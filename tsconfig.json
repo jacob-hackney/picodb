@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "es2024",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "rootDir": "src",
+    "outDir": "lib",
+    "declarationDir": "lib/types",
+    "strict": true,
+    "declaration": true,
+    "esModuleInterop": true,
+    "types": ["node"]
+  }
+}
