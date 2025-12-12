@@ -1,0 +1,27 @@
+{
+  "name": "picodb",
+  "version": "1.0.0",
+  "description": "A JavaScript database that can be both local and remote-access",
+  "keywords": [
+    "database",
+    "db",
+    "server",
+    "data"
+  ],
+  "homepage": "https://github.com/jacob-hackney/picodb#readme",
+  "bugs": {
+    "url": "https://github.com/jacob-hackney/picodb/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jacob-hackney/picodb.git"
+  },
+  "license": "Apache-2.0",
+  "author": "Jacob Hackney",
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/types/index.d.ts",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}

@@ -1,0 +1,8 @@
+# dirs
+__tests__/
+node_modules/
+src/
+.git/
+
+# files
+tsconfig.json
