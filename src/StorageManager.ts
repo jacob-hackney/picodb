@@ -3,13 +3,13 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
+import { IOQueue } from "./internal/IOQueue.js";
+
 interface StorageManagerOptions {
-  pageSize?: number;
   cacheSize?: number;
 }
 const OPTIONS_DEFAULTS: StorageManagerOptions = {
-  pageSize: 64,
-  cacheSize: 128,
+  cacheSize: 512,
 };
 
 /**
@@ -17,22 +17,19 @@ const OPTIONS_DEFAULTS: StorageManagerOptions = {
  * @class StorageManager
  */
 export class StorageManager {
-  #pageSize: number;
+  #pageSize!: number;
   #cacheSize: number;
 
   #dirPath: string;
   #dbPath: string;
   #lockPath: string;
 
-  #dbHandle: fs.promises.FileHandle =
-    undefined as unknown as fs.promises.FileHandle;
-  #lockHandle: fs.promises.FileHandle =
-    undefined as unknown as fs.promises.FileHandle;
-  #logHandle: fs.promises.FileHandle =
-    undefined as unknown as fs.promises.FileHandle;
+  #dbHandle!: fs.promises.FileHandle;
+  #lockHandle!: fs.promises.FileHandle;
+  #logHandle!: fs.promises.FileHandle;
 
   #initQueue: Promise<any>[] = [];
-  #operationQueue: Promise<any>[] = [];
+  #operationQueue: IOQueue = new IOQueue();
   #ready: boolean = false;
 
   #cache: Map<number, Buffer> = new Map();
@@ -48,12 +45,6 @@ export class StorageManager {
    */
   constructor(dirPath: string = "~/.picodb", options?: StorageManagerOptions) {
     const finalOptions = { ...OPTIONS_DEFAULTS, ...options };
-    this.#pageSize = finalOptions.pageSize! * 1024;
-    if (this.#pageSize <= 0 || !Number.isInteger(this.#pageSize)) {
-      throw new RangeError(
-        "Invalid pageSize option. It must positive and have an integer byte size(pageSize * 1024)."
-      );
-    }
     if (
       finalOptions.cacheSize! <= 0 ||
       !Number.isInteger(finalOptions.cacheSize!)
@@ -76,10 +67,13 @@ export class StorageManager {
   }
 
   async #init() {
-    const exists = await fs.promises.access(this.#dbPath).then(
-      () => true,
-      () => false
-    );
+    await fs.promises.access(this.#dbPath).catch((err) => {
+      throw new Error(
+        `StorageManager initialization failed: ${err.message}${
+          err.code === "ENOENT" ? "\nRun: picodb create" : ""
+        }`
+      );
+    });
 
     try {
       await fs.promises.mkdir(this.#dirPath, { recursive: true });
@@ -96,11 +90,80 @@ export class StorageManager {
         }. Try running the process with elevated permissions(sudo).`
       );
     }
+  }
 
-    if (!exists) {
-      await this.allocatePage();
+  /**
+   * Creates a new page in the storage file.
+   * @returns {Promise<number>} The page index of the newly created page
+   */
+  async allocatePage(): Promise<number> {
+    const callerPromise = new Promise<number>(async (resolve, reject) => {
+      const executionLogic = async () => {
+        try {
+          const stats = await this.#dbHandle.stat();
+          const pageIndex = Math.floor(stats.size / this.#pageSize);
+          const buffer = Buffer.alloc(this.#pageSize);
+          await this.#dbHandle.write(buffer, 0, this.#pageSize, stats.size);
+
+          resolve(pageIndex);
+        } catch (err) {
+          reject(err);
+        }
+      };
+
+      if (this.#ready) {
+        this.#operationQueue.enqueue(executionLogic);
+      } else {
+        this.#initQueue.push(executionLogic());
+      }
+    });
+
+    return callerPromise;
+  }
+
+  //async readPage(pageIndex: number): Promise<Buffer> {}
+  //async writePage(pageIndex: number, data: Buffer): Promise<void> {}
+
+  static async create(
+    dirPath: string = "~/.picodb",
+    pageSizeKB: number = 64,
+    overwrite: boolean = false
+  ): Promise<void> {
+    if (pageSizeKB <= 0 || !Number.isInteger(pageSizeKB)) {
+      throw new RangeError(
+        "Invalid pageSizeKB. It must be a positive integer."
+      );
     }
 
-    this.#ready = true;
+    const resolvedDirPath = path.resolve(
+      dirPath.replace(/^~(?=$|\/|\\)/, os.homedir())
+    );
+
+    if (resolvedDirPath === path.sep)
+      throw new Error("Refusing to create database in root directory.");
+
+    if (
+      (await fs.promises
+        .opendir(resolvedDirPath)
+        .then(() => true)
+        .catch(() => false)) &&
+      !overwrite
+    ) {
+      throw new Error(
+        `Directory ${resolvedDirPath} already exists. To overwrite, set the overwrite flag to true.`
+      );
+    }
+    await fs.promises.rm(resolvedDirPath, { recursive: true, force: true });
+
+    const dbPath = path.join(resolvedDirPath, "pico.db");
+    await fs.promises.mkdir(resolvedDirPath, { recursive: true });
+    const handle = await fs.promises.open(dbPath, "w+");
+    await fs.promises.open(path.join(resolvedDirPath, "picodb.lock"), "w+");
+    await fs.promises.open(path.join(resolvedDirPath, "picodb.binlog"), "w+");
+    const pageSize = pageSizeKB * 1024;
+    const initialBuffer = Buffer.alloc(pageSize);
+    initialBuffer.writeUInt32LE(pageSize, 0);
+    await handle.write(initialBuffer, 0, pageSize, 0);
+    await handle.close();
   }
 }

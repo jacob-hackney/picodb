@@ -20,11 +20,14 @@
   "author": "Jacob Hackney",
   "type": "module",
   "main": "lib/index.js",
+  "bin": "lib/cli.js",
   "types": "lib/types/index.d.ts",
   "dependencies": {
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "yargs": "^18.0.0"
   },
   "devDependencies": {
-    "@types/node": "^25.0.1"
+    "@types/node": "^25.0.1",
+    "@types/yargs": "^17.0.35"
   }
 }
