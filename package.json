@@ -23,6 +23,7 @@
   "bin": "lib/cli.js",
   "types": "lib/types/index.d.ts",
   "dependencies": {
+    "env-paths": "^3.0.0",
     "express": "^5.2.1",
     "yargs": "^18.0.0"
   },
