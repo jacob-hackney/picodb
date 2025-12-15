@@ -2,7 +2,8 @@
 
 import yargs from "yargs/yargs";
 import { hideBin } from "yargs/helpers";
-import { StorageManager } from "./StorageManager.js";
+import { StorageManager } from "./internal/StorageManager.js";
+import envPaths from "env-paths";
 
 const DEFAULT_PAGE_SIZE = 64; // in KB
 
@@ -18,12 +19,6 @@ argv
     "Create a new PicoDB database",
     (yargs) => {
       return yargs
-        .option("path", {
-          alias: "p",
-          type: "string",
-          description: "The full path to the new database file.",
-          default: "~/.picodb",
-        })
         .option("pageSize", {
           alias: "s",
           type: "number",
@@ -42,7 +37,7 @@ argv
   .parse();
 
 async function createHandler(argv: any) {
-  const dirPath: string = argv.path;
+  const dirPath: string = envPaths("picodb", { suffix: "" }).data;
   const pageSizeKB: number = argv.pageSize;
   const overwrite: boolean = argv.overwrite;
 
@@ -66,7 +61,7 @@ async function createHandler(argv: any) {
   }
 
   try {
-    await StorageManager.create(dirPath, pageSizeKB, overwrite);
+    await StorageManager.create(pageSizeKB, overwrite);
     console.log("\nDatabase successfully created.");
     process.exit(0);
   } catch (err) {
