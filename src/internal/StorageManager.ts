@@ -5,13 +5,19 @@ import path from "node:path";
 import { IOQueue } from "./IOQueue.js";
 import envPaths from "env-paths";
 
-interface StorageManagerOptions {}
-const OPTIONS_DEFAULTS: StorageManagerOptions = {};
+interface StorageManagerOptions {
+  path: string;
+}
+const OPTIONS_DEFAULTS: StorageManagerOptions = {
+  path: envPaths("picodb", { suffix: "" }).data,
+};
 
 export class StorageManager {
+  private options: StorageManagerOptions;
+
   private pageSize!: number;
 
-  private dirPath: string = envPaths("picodb", { suffix: "" }).data;
+  private dirPath: string;
   private dbPath: string;
   private lockPath: string;
 
@@ -21,10 +27,10 @@ export class StorageManager {
 
   private queue: IOQueue = new IOQueue();
 
-  private cache: Map<number, Buffer> = new Map();
-
   constructor(options?: StorageManagerOptions) {
     const finalOptions = { ...OPTIONS_DEFAULTS, ...options };
+    this.options = finalOptions;
+    this.dirPath = this.options.path;
 
     this.dbPath = path.join(this.dirPath, "pico.db");
     this.lockPath = path.join(this.dirPath, "picodb.lock");
@@ -45,8 +51,8 @@ export class StorageManager {
 
     try {
       await fs.promises.mkdir(this.dirPath, { recursive: true });
-      this.dbHandle = await fs.promises.open(this.dbPath, "a+");
-      this.lockHandle = await fs.promises.open(this.lockPath, "a+");
+      this.dbHandle = await fs.promises.open(this.dbPath, "r+");
+      this.lockHandle = await fs.promises.open(this.lockPath, "r+");
       this.logHandle = await fs.promises.open(
         path.join(this.dirPath, "picodb.binlog"),
         "a+"
@@ -84,18 +90,30 @@ export class StorageManager {
 
     return this.queue.enqueue(executionLogic);
   }
-  //async writePage(pageIndex: number, data: Buffer): Promise<void> {}
+
+  async writePage(pageIndex: number, data: Buffer): Promise<void> {
+    const executionLogic = async (): Promise<void> => {
+      if (data.length !== this.pageSize)
+        throw new RangeError(
+          `Data length (${data.length}) does not match page size (${this.pageSize}).`
+        );
+
+      const position = pageIndex * this.pageSize + 4;
+      await this.dbHandle.write(data, 0, this.pageSize, position);
+    };
+
+    return this.queue.enqueue(executionLogic);
+  }
 
   static async create(
     pageSizeKB: number = 64,
+    dirPath: string = envPaths("picodb", { suffix: "" }).data,
     overwrite: boolean = false
   ): Promise<void> {
     if (pageSizeKB <= 0 || !Number.isInteger(pageSizeKB))
       throw new RangeError(
         "Invalid pageSizeKB. It must be a positive integer."
       );
-
-    const dirPath = envPaths("picodb", { suffix: "" }).data;
 
     if (
       (await fs.promises

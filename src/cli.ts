@@ -30,6 +30,12 @@ argv
           type: "boolean",
           description: "If set, overwrites an existing database file.",
           default: false,
+        })
+        .option("path", {
+          alias: "p",
+          type: "string",
+          description: "The directory path where the database will be created.",
+          default: envPaths("picodb", { suffix: "" }).data,
         });
     },
     createHandler
@@ -37,7 +43,7 @@ argv
   .parse();
 
 async function createHandler(argv: any) {
-  const dirPath: string = envPaths("picodb", { suffix: "" }).data;
+  const dirPath: string = argv.path;
   const pageSizeKB: number = argv.pageSize;
   const overwrite: boolean = argv.overwrite;
 
@@ -61,7 +67,7 @@ async function createHandler(argv: any) {
   }
 
   try {
-    await StorageManager.create(pageSizeKB, overwrite);
+    await StorageManager.create(pageSizeKB, dirPath, overwrite);
     console.log("\nDatabase successfully created.");
     process.exit(0);
   } catch (err) {
