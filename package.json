@@ -22,6 +22,16 @@
   "main": "lib/index.js",
   "bin": "lib/cli.js",
   "types": "lib/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./internal/*": {
+      "types": "./lib/types/internal/*.d.ts",
+      "default": "./lib/internal/*.js"
+    }
+  },
   "dependencies": {
     "env-paths": "^3.0.0",
     "express": "^5.2.1",
