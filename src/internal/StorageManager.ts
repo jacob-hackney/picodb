@@ -18,8 +18,6 @@ export class StorageManager {
   private pageSize!: number;
 
   private dirPath: string;
-  private dbPath: string;
-  private lockPath: string;
 
   private dbHandle!: fs.promises.FileHandle;
   private lockHandle!: fs.promises.FileHandle;
@@ -32,27 +30,32 @@ export class StorageManager {
     this.options = finalOptions;
     this.dirPath = this.options.path;
 
-    this.dbPath = path.join(this.dirPath, "pico.db");
-    this.lockPath = path.join(this.dirPath, "picodb.lock");
-
     this.init().catch((err) => {
       throw new Error(err.message);
     });
   }
 
   private async init() {
-    await fs.promises.access(this.dbPath).catch((err) => {
-      throw new Error(
-        `StorageManager initialization failed: ${err.message}${
-          err.code === "ENOENT" ? "\nRun: picodb create" : ""
-        }`
-      );
-    });
+    await fs.promises
+      .access(path.join(this.dirPath, "pico.db"))
+      .catch((err) => {
+        throw new Error(
+          `StorageManager initialization failed: ${err.message}${
+            err.code === "ENOENT" ? "\nRun: picodb init" : ""
+          }`
+        );
+      });
 
     try {
       await fs.promises.mkdir(this.dirPath, { recursive: true });
-      this.dbHandle = await fs.promises.open(this.dbPath, "r+");
-      this.lockHandle = await fs.promises.open(this.lockPath, "r+");
+      this.dbHandle = await fs.promises.open(
+        path.join(this.dirPath, "pico.db"),
+        "r+"
+      );
+      this.lockHandle = await fs.promises.open(
+        path.join(this.dirPath, "picodb.lock"),
+        "r+"
+      );
       this.logHandle = await fs.promises.open(
         path.join(this.dirPath, "picodb.binlog"),
         "a+"

@@ -15,7 +15,7 @@ const argv = yargs(hideBin(process.argv))
 
 argv
   .command(
-    "create",
+    "init",
     "Create a new PicoDB database",
     (yargs) => {
       return yargs
