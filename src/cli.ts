@@ -8,10 +8,13 @@ import envPaths from "env-paths";
 const DEFAULT_PAGE_SIZE = 64; // in KB
 
 const argv = yargs(hideBin(process.argv))
+  .scriptName("picodb")
+  .usage("$0 <command> [options]")
   .strict()
   .demandCommand(1, "You need at least one command before moving on")
   .help()
-  .alias("help", "h");
+  .alias("help", "h")
+  .alias("version", "v");
 
 argv
   .command(
@@ -19,7 +22,7 @@ argv
     "Create a new PicoDB database",
     (yargs) => {
       return yargs
-        .option("pageSize", {
+        .option("page-size", {
           alias: "s",
           type: "number",
           description: "The size of each page in KB (e.g., 64, 128).",
@@ -39,6 +42,87 @@ argv
         });
     },
     createHandler
+  )
+  .command(
+    "config",
+    "Set configuration options for the PicoDB database",
+    (yargs) => {}
+  )
+  .command(
+    "fix",
+    "Fix issues in the PicoDB database, e.g. after a crash or corruption",
+    (yargs) => {
+      return yargs.option(
+        "reset", {
+          alias: 'r',
+          type: "boolean",
+          description: "Clear the database and re-commit all transactions.",
+          default: false,
+        }
+      )
+    }
+  )
+  .command(
+    "rebuild",
+    "Change options that require a full rebuild of the database, e.g. page size. Data will be preserved.",
+    (yargs) => {
+      return yargs
+        .option("page-size", {
+          alias: "s",
+          type: "number",
+          description: "The size of each page in KB (e.g., 64, 128).",
+          default: DEFAULT_PAGE_SIZE,
+        })
+    }
+  )
+  .command(
+    "move",
+    "Move the database to a new location",
+    (yargs) => {
+      return yargs
+        .option("new-path", {
+          alias: "n",
+          type: "string",
+          description: "The new directory path where the database will be moved to.",
+          demandOption: true,
+        })
+        .option("overwrite", {
+          alias: "o",
+          type: "boolean",
+          description: "If set, overwrites an existing database file in the new location.",
+          default: false,
+        });
+    }
+  )
+  .command(
+    "upgrade",
+    "Upgrade the database to the latest version",
+    (yargs) => {}
+  )
+  .command(
+    "log",
+    "Parse the binary log file and print out the contents",
+    (yargs) => {
+      return yargs
+        .option("start", {
+          alias: "s",
+          type: "number",
+          description: "The starting log entry number to parse.",
+          default: 0,
+        })
+        .option("count", {
+          alias: "c",
+          type: "number",
+          description: "The number of log entries to parse.",
+          default: 10,
+        })
+        .option("output", {
+          alias: "o",
+          type: "string",
+          description: "The output file path to write the parsed log entries to.",
+          default: null,
+        })
+    }
   )
   .parse();
 
