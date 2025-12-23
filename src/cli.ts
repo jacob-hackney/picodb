@@ -46,54 +46,66 @@ argv
   .command(
     "config",
     "Set configuration options for the PicoDB database",
-    (yargs) => {}
+    (yargs) => {
+      return yargs.command(
+        "get",
+        "Get all metadata, including those that can't be changed with picodb config set.",
+        (yargs) => {
+          return yargs.option("path", {
+            alias: "p",
+            type: "string",
+            description: "The database path to get the metadata from",
+            default: envPaths("picodb", { suffix: "" }).data,
+          });
+        },
+        async (argv: any): Promise<void> => {
+          const data = await StorageManager.getMetadata(argv.path);
+          console.log(`Page size: ${data.pageSize / 1024} KB`);
+        }
+      );
+    }
   )
   .command(
     "fix",
     "Fix issues in the PicoDB database, e.g. after a crash or corruption",
     (yargs) => {
-      return yargs.option(
-        "reset", {
-          alias: 'r',
-          type: "boolean",
-          description: "Clear the database and re-commit all transactions.",
-          default: false,
-        }
-      )
+      return yargs.option("reset", {
+        alias: "r",
+        type: "boolean",
+        description: "Clear the database and re-commit all transactions.",
+        default: false,
+      });
     }
   )
   .command(
     "rebuild",
     "Change options that require a full rebuild of the database, e.g. page size. Data will be preserved.",
     (yargs) => {
-      return yargs
-        .option("page-size", {
-          alias: "s",
-          type: "number",
-          description: "The size of each page in KB (e.g., 64, 128).",
-          default: DEFAULT_PAGE_SIZE,
-        })
+      return yargs.option("page-size", {
+        alias: "s",
+        type: "number",
+        description: "The size of each page in KB (e.g., 64, 128).",
+        default: DEFAULT_PAGE_SIZE,
+      });
     }
   )
-  .command(
-    "move",
-    "Move the database to a new location",
-    (yargs) => {
-      return yargs
-        .option("new-path", {
-          alias: "n",
-          type: "string",
-          description: "The new directory path where the database will be moved to.",
-          demandOption: true,
-        })
-        .option("overwrite", {
-          alias: "o",
-          type: "boolean",
-          description: "If set, overwrites an existing database file in the new location.",
-          default: false,
-        });
-    }
-  )
+  .command("move", "Move the database to a new location", (yargs) => {
+    return yargs
+      .option("new-path", {
+        alias: "n",
+        type: "string",
+        description:
+          "The new directory path where the database will be moved to.",
+        demandOption: true,
+      })
+      .option("overwrite", {
+        alias: "o",
+        type: "boolean",
+        description:
+          "If set, overwrites an existing database file in the new location.",
+        default: false,
+      });
+  })
   .command(
     "upgrade",
     "Upgrade the database to the latest version",
@@ -119,9 +131,10 @@ argv
         .option("output", {
           alias: "o",
           type: "string",
-          description: "The output file path to write the parsed log entries to.",
+          description:
+            "The output file path to write the parsed log entries to.",
           default: null,
-        })
+        });
     }
   )
   .parse();

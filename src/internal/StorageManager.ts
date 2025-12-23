@@ -12,6 +12,10 @@ const OPTIONS_DEFAULTS: StorageManagerOptions = {
   path: envPaths("picodb", { suffix: "" }).data,
 };
 
+interface StorageManagerMetadata {
+  pageSize: number;
+}
+
 export class StorageManager {
   private options: StorageManagerOptions;
 
@@ -106,6 +110,15 @@ export class StorageManager {
     };
 
     return this.queue.enqueue(executionLogic);
+  }
+
+  static async getMetadata(dirPath: string = envPaths("picodb", { suffix: "" }).data): Promise<StorageManagerMetadata> {
+    const handle = await fs.promises.open(path.join(dirPath, "pico.db"), "r");
+    const data = Buffer.alloc(4);
+    await handle.read(data, 0, 4, 0);
+    return {
+      pageSize: data.readUInt32LE(0)
+    }
   }
 
   static async create(
