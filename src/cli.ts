@@ -147,6 +147,10 @@ async function createHandler(argv: any) {
   console.log(`Creating a new PicoDB database at ${dirPath}...`);
   console.log(`Page size: ${pageSizeKB} KB`);
 
+  if(pageSizeKB > 10 * 1024) {
+    console.log("\x1b[1;33mWarning:\x1b[22m Your page size exceeds 10 MB. Your runtime may crash due to memory overflow if your cache size is high.\x1b[0m");
+  }
+
   if (overwrite) {
     process.stdout.write(
       "Confirm database overwrite? All existing data will be lost! (y/n): "
