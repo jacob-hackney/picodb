@@ -5,7 +5,7 @@ import path from "node:path";
 import { IOQueue } from "./IOQueue.js";
 import envPaths from "env-paths";
 
-interface StorageManagerOptions {
+export interface StorageManagerOptions {
   path: string;
 }
 const OPTIONS_DEFAULTS: StorageManagerOptions = {
@@ -17,17 +17,17 @@ interface StorageManagerMetadata {
 }
 
 export class StorageManager {
-  private options: StorageManagerOptions;
+  options: StorageManagerOptions;
 
-  private pageSize!: number;
+  pageSize!: number;
 
-  private dirPath: string;
+  dirPath: string;
 
-  private dbHandle!: fs.promises.FileHandle;
-  private lockHandle!: fs.promises.FileHandle;
-  private logHandle!: fs.promises.FileHandle;
+  dbHandle!: fs.promises.FileHandle;
+  lockHandle!: fs.promises.FileHandle;
+  logHandle!: fs.promises.FileHandle;
 
-  private queue: IOQueue = new IOQueue();
+  queue: IOQueue = new IOQueue();
 
   constructor(options?: StorageManagerOptions) {
     const finalOptions = { ...OPTIONS_DEFAULTS, ...options };
@@ -39,7 +39,7 @@ export class StorageManager {
     });
   }
 
-  private async init() {
+  async init() {
     await fs.promises
       .access(path.join(this.dirPath, "pico.db"))
       .catch((err) => {
@@ -150,7 +150,7 @@ export class StorageManager {
     await fs.promises.open(path.join(dirPath, "picodb.binlog"), "w+");
     const pageSize = pageSizeKB * 1024;
     const initialBuffer = Buffer.alloc(4);
-    initialBuffer.writeUInt32LE(pageSize, 0);
+    initialBuffer.writeUInt32LE(pageSize, 0); // page size: 4 byte UInt
     await handle.write(initialBuffer, 0, 4, 0);
     await handle.write(Buffer.alloc(pageSize), 0, pageSize, 4);
     await handle.close();
