@@ -5,19 +5,16 @@ import path from "node:path";
 import { IOQueue } from "./IOQueue.js";
 import envPaths from "env-paths";
 
-export interface StorageManagerOptions {
+interface Options {
   path: string;
 }
-const OPTIONS_DEFAULTS: StorageManagerOptions = {
-  path: envPaths("picodb", { suffix: "" }).data,
-};
 
 interface StorageManagerMetadata {
   pageSize: number;
 }
 
 export class StorageManager {
-  options: StorageManagerOptions;
+  options: Options;
 
   pageSize!: number;
 
@@ -29,9 +26,8 @@ export class StorageManager {
 
   queue: IOQueue = new IOQueue();
 
-  constructor(options?: StorageManagerOptions) {
-    const finalOptions = { ...OPTIONS_DEFAULTS, ...options };
-    this.options = finalOptions;
+  constructor(options: Options) {
+    this.options = options;
     this.dirPath = this.options.path;
 
     this.init().catch((err) => {

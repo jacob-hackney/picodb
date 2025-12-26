@@ -1,5 +1,10 @@
 import { Buffer } from "node:buffer";
-import { StorageManager, StorageManagerOptions } from "./StorageManager.js";
+import { StorageManager } from "./StorageManager.js";
+
+interface Options {
+  cacheSize: number;
+  smPath: string;
+}
 
 export class BufferPoolManager {
   cache: Map<number, Buffer> = new Map();
@@ -12,15 +17,15 @@ export class BufferPoolManager {
 
   manager: StorageManager;
 
-  constructor(size: number = 128, storageManagerOptions?: StorageManagerOptions) {
-    if (size < 4 || !Number.isInteger(size))
+  constructor(options: Options) {
+    if (options.cacheSize < 4 || !Number.isInteger(options.cacheSize))
       throw new RangeError(
-        `size must be an integer greater than or equal to 4. Received ${size}`
+        `options.cacheSize must be an integer greater than or equal to 4. Received ${options.cacheSize}`
       );
-    const oneFourth = Math.floor(size / 4);
+    const oneFourth = Math.floor(options.cacheSize / 4);
     this.cacheSize = oneFourth * 3;
     this.historyListSize = oneFourth;
-    this.manager = new StorageManager(storageManagerOptions);
+    this.manager = new StorageManager({ path: options.smPath });
   }
 
   async createPage() {
