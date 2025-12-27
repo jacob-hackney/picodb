@@ -33,7 +33,7 @@ export class BufferPoolManager {
     if (this.historyList.size >= this.historyListSize)
       await this.evictFromHistory();
 
-    const buffer = Buffer.alloc(this.manager.pageSize);
+    const buffer = Buffer.alloc(this.manager.header.pageSize);
     this.historyList.set(pageId, buffer);
 
     this.pinCounts.set(pageId, 1);

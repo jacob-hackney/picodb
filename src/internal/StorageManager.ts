@@ -16,7 +16,7 @@ interface StorageManagerMetadata {
 export class StorageManager {
   options: Options;
 
-  pageSize!: number;
+  header: StorageManagerMetadata;
 
   dirPath: string;
 
@@ -29,6 +29,17 @@ export class StorageManager {
   constructor(options: Options) {
     this.options = options;
     this.dirPath = this.options.path;
+
+    const handle = fs.openSync(
+      path.join(this.dirPath, "pico.db"),
+      "r"
+    );
+    const data = Buffer.alloc(4);
+    fs.readSync(handle, data, 0, 4, 0);
+    this.header = {
+      pageSize: data.readUInt32LE(0)
+    }
+    fs.closeSync(handle);
 
     this.init().catch((err) => {
       throw new Error(err.message);
@@ -60,9 +71,6 @@ export class StorageManager {
         path.join(this.dirPath, "picodb.binlog"),
         "a+"
       );
-      this.pageSize = (
-        await this.dbHandle.read(Buffer.alloc(8), 0, 4, 0)
-      ).buffer.readUInt32LE(0);
       this.queue.start();
     } catch {
       throw new Error(
@@ -74,9 +82,9 @@ export class StorageManager {
   async allocatePage(): Promise<number> {
     const executionLogic = async (): Promise<number> => {
       const stats = await this.dbHandle.stat();
-      const pageIndex = Math.floor(stats.size / this.pageSize);
-      const buffer = Buffer.alloc(this.pageSize);
-      await this.dbHandle.write(buffer, 0, this.pageSize, stats.size);
+      const pageIndex = Math.floor(stats.size / this.header.pageSize);
+      const buffer = Buffer.alloc(this.header.pageSize);
+      await this.dbHandle.write(buffer, 0, this.header.pageSize, stats.size);
       return pageIndex;
     };
 
@@ -85,9 +93,9 @@ export class StorageManager {
 
   async readPage(pageIndex: number): Promise<Buffer> {
     const executionLogic = async (): Promise<Buffer> => {
-      const buffer = Buffer.alloc(this.pageSize);
-      const position = pageIndex * this.pageSize + 4;
-      return (await this.dbHandle.read(buffer, 0, this.pageSize, position))
+      const buffer = Buffer.alloc(this.header.pageSize);
+      const position = pageIndex * this.header.pageSize + 4;
+      return (await this.dbHandle.read(buffer, 0, this.header.pageSize, position))
         .buffer;
     };
 
@@ -96,13 +104,13 @@ export class StorageManager {
 
   async writePage(pageIndex: number, data: Buffer): Promise<void> {
     const executionLogic = async (): Promise<void> => {
-      if (data.length !== this.pageSize)
+      if (data.length !== this.header.pageSize)
         throw new RangeError(
-          `Data length (${data.length}) does not match page size (${this.pageSize}).`
+          `Data length (${data.length}) does not match page size (${this.header.pageSize}).`
         );
 
-      const position = pageIndex * this.pageSize + 4;
-      await this.dbHandle.write(data, 0, this.pageSize, position);
+      const position = pageIndex * this.header.pageSize + 4;
+      await this.dbHandle.write(data, 0, this.header.pageSize, position);
     };
 
     return this.queue.enqueue(executionLogic);
