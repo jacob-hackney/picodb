@@ -5,6 +5,7 @@
     "rootDir": "src",
     "outDir": "dist/src",
     "declarationDir": "dist/types",
+    "types": ["node"],
     "declaration": true,
     "strict": true
   }

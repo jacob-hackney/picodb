@@ -22,5 +22,8 @@
   "exports": {
     ".": "./dist/src/index.js",
     "./internal": "./dist/src/internal-exports.js"
+  },
+  "devDependencies": {
+    "@types/node": "^25.2.3"
   }
 }
