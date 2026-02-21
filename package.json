@@ -1,7 +1,7 @@
 {
   "name": "picodb",
   "version": "1.0.0",
-  "description": "A purely JavaScript database, built for effectively storing data on your backends",
+  "description": "A purely JavaScript database, built for effectively storing data on your backend",
   "keywords": [
     "database"
   ],
@@ -17,12 +17,13 @@
   "license": "Apache-2.0",
   "author": "Jacob Hackney",
   "type": "module",
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
+  "main": "./lib/index.js",
+  "types": "./types/index.d.ts",
   "exports": {
-    ".": "./dist/src/index.js",
-    "./internal": "./dist/src/internal-exports.js"
+    ".": "./lib/index.js",
+    "./internal": "./lib/internal-exports.js"
   },
+  "files": ["./lib", "./types", "./README.md", "./CHANGELOG.md"],
   "devDependencies": {
     "@types/node": "^25.2.3"
   }

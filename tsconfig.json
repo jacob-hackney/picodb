@@ -3,8 +3,8 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "rootDir": "src",
-    "outDir": "dist/src",
-    "declarationDir": "dist/types",
+    "outDir": "lib",
+    "declarationDir": "types",
     "types": ["node"],
     "declaration": true,
     "strict": true
