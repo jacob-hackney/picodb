@@ -2,6 +2,10 @@
   "compilerOptions": {
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "baseUrl": ".",
+    "paths": {
+      "#*": ["./src/*"]
+    },
     "rootDir": "src",
     "outDir": "lib",
     "declarationDir": "types",
