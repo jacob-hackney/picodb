@@ -23,7 +23,16 @@
     ".": "./lib/index.js",
     "./internal": "./lib/internal-exports.js"
   },
-  "files": ["./lib", "./types", "./README.md", "./CHANGELOG.md"],
+  "files": [
+    "./lib",
+    "./types",
+    "./README.md",
+    "./CHANGELOG.md"
+  ],
+  "dependencies": {
+    "winston": "^3.19.0",
+    "winston-daily-rotate-file": "^5.0.0"
+  },
   "devDependencies": {
     "@types/node": "^25.2.3"
   }
