@@ -18,10 +18,16 @@
   "author": "Jacob Hackney",
   "type": "module",
   "main": "./lib/index.js",
-  "types": "./types/index.d.ts",
+  "bin": "./lib/cli/index.js",
   "exports": {
-    ".": "./lib/index.js",
-    "./internal": "./lib/internal-exports.js"
+    ".": {
+      "import": "./lib/index.js",
+      "types": "./types/index.d.ts"
+    },
+    "./*": {
+      "import": "./lib/*.js",
+      "types": "./types/*.d.ts"
+    }
   },
   "files": [
     "./lib",
