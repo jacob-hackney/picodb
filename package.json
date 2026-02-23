@@ -5,7 +5,10 @@
   "keywords": [
     "database"
   ],
-  "scripts": {},
+  "scripts": {
+    "build": "tsc",
+    "postbuild": "cp src/internal/config-schema.json lib/internal/config-schema.json"
+  },
   "homepage": "https://github.com/jacob-hackney/picodb#readme",
   "bugs": {
     "url": "https://github.com/jacob-hackney/picodb/issues"
