@@ -5,10 +5,6 @@
   "keywords": [
     "database"
   ],
-  "scripts": {
-    "build": "tsc",
-    "postbuild": "cp src/internal/config-schema.json lib/internal/config-schema.json"
-  },
   "homepage": "https://github.com/jacob-hackney/picodb#readme",
   "bugs": {
     "url": "https://github.com/jacob-hackney/picodb/issues"
@@ -17,11 +13,9 @@
     "type": "git",
     "url": "git+https://github.com/jacob-hackney/picodb.git"
   },
-  "license": "Apache-2.0",
+  "license": "SEE LICENSE IN LICENSE.md",
   "author": "Jacob Hackney",
   "type": "module",
-  "main": "./lib/index.js",
-  "bin": "./lib/cli/index.js",
   "exports": {
     ".": {
       "import": "./lib/index.js",
@@ -32,12 +26,24 @@
       "types": "./types/*.d.ts"
     }
   },
+  "main": "./lib/index.js",
+  "bin": {
+    "picodb": "lib/cli/index.js"
+  },
+  "directories": {
+    "lib": "lib"
+  },
   "files": [
     "./lib",
     "./types",
     "./README.md",
-    "./CHANGELOG.md"
+    "./CHANGELOG.md",
+    "./LICENSE.md"
   ],
+  "scripts": {
+    "build": "tsc",
+    "postbuild": "cp src/internal/config-schema.json lib/internal/config-schema.json"
+  },
   "dependencies": {
     "commander": "^14.0.3",
     "winston": "^3.19.0",
