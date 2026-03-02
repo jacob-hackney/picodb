@@ -17,20 +17,25 @@
         }
       }
     },
+    "cacheSize": {
+      "type": "number",
+      "description": "The maximum number of pages to keep in memory for caching.",
+      "default": 16384
+    },
     "autoRecovery": {
       "type": "boolean",
       "description": "Automatically fix the database on server start if the data is corrupted.",
       "default": true
     },
-    "storagePath": {
-      "type": "string",
-      "description": "The file system path where PicoDB will store its data and logs. Can be an absolute path or a path relative to the user's home directory (using ~).",
-      "default": "~/.picodb"
-    },
     "queueConcurrencyLimit": {
       "type": "number",
       "description": "The maximum number of concurrent operations allowed in the file I/O queue.",
       "default": 4
+    },
+    "storagePath": {
+      "type": "string",
+      "description": "The file system path where PicoDB will store its data and logs. Can be an absolute path or a path relative to the user's home directory (using ~).",
+      "default": "~/.picodb"
     }
   }
 }
