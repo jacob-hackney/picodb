@@ -4,6 +4,7 @@ import type { Buffer } from "node:buffer";
 import { PageTypes } from "./globals.js";
 
 export interface Config {
+  cacheSize: number;
   queueConcurrencyLimit: number;
   storagePath: string;
 }
@@ -62,3 +63,26 @@ export interface IStorageManager {
   init(path: string): Promise<void>;
 }
 // #endregion StorageManager
+
+// #region BufferPoolManager
+export interface IBufferPoolManager {
+  readonly slab: Buffer; // the cache, one big buffer to reduce overhead
+  availableOffsets: number[];
+  pageIdMap: Map<number, number>; // page id, offset
+  dirtyList: Map<number, boolean>; // page id, t/f
+  pinCounts: Map<number, number>; // page id, pin amount
+  cacheSize: number;
+
+  manager: IStorageManager;
+
+  getPage(id: number): Promise<Buffer>;
+
+  unpinPage(id: number, isDirty?: boolean): number; // returns the new pin count
+
+  allocatePage(pageType: keyof typeof PageTypes): Promise<Buffer>;
+
+  evictOldest(force: boolean): Promise<number>; // returns page id of evicted page
+
+  flush(forceEviction: boolean): Promise<void>;
+}
+//#endregion BufferPoolManager

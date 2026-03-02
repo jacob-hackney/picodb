@@ -12,11 +12,9 @@ export enum PageTypes {
 
 export const PAGE_SIZE = 8192; // 8KiB
 
-export const INTERNAL_SLOT_MAX_IDS = BigInt(
-  Math.trunc((PAGE_SIZE - 1) / 14),
-);
+export const INTERNAL_SLOT_MAX_IDS = BigInt(Math.trunc((PAGE_SIZE - 1) / 14));
 export const ROOT_SLOT_MAX_IDS = BigInt(
-  Math.trunc(((PAGE_SIZE - 1) / 12)) * Number(INTERNAL_SLOT_MAX_IDS),
+  Math.trunc((PAGE_SIZE - 1) / 12) * Number(INTERNAL_SLOT_MAX_IDS),
 );
 
 export const CONFIG_DEFAULTS = {
@@ -24,6 +22,7 @@ export const CONFIG_DEFAULTS = {
     host: "localhost",
     port: 3000,
   },
+  cacheSize: 16384,
   autoRecovery: true,
   queueConcurrencyLimit: 4,
   storagePath: "",
