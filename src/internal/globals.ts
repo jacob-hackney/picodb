@@ -1,3 +1,5 @@
+import os from "node:os";
+
 export enum PageTypes {
   DATA = 1, // stores actual records
   LOB_HEAD = 2, // first page of a large object greater than the page size
@@ -17,13 +19,16 @@ export const ROOT_SLOT_MAX_IDS = BigInt(
   Math.trunc((PAGE_SIZE - 1) / 12) * Number(INTERNAL_SLOT_MAX_IDS),
 );
 
+const oneEighthRam = os.totalmem() / 8;
+const maxCacheSize = Math.floor(oneEighthRam / PAGE_SIZE);
+
 export const CONFIG_DEFAULTS = {
   server: {
     host: "localhost",
     port: 3000,
   },
-  cacheSize: 16384,
+  cacheSize: Math.min(16384, maxCacheSize), // 128MiB default cache size, capped at one-eigth of system RAM
   autoRecovery: true,
-  queueConcurrencyLimit: 4,
+  queueConcurrencyLimit: Math.min(4, Math.max(1, Math.floor(os.cpus().length / 2))), // default to half of available CPU cores, capped at 4
   storagePath: "",
 };
