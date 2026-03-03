@@ -106,7 +106,7 @@ export class StorageManager implements IStorageManager {
   }
 
   // variables for tracking progress of database creation
-  private static PROGRESS_STEPS = 4 + 8 + 3 + 3; // 3 steps for verification + 8 steps for data dir + 3 steps for log dir + 3 steps for config dir
+  private static PROGRESS_STEPS = 4 + 8 + 3 + 2; // 3 steps for verification + 8 steps for data dir + 3 steps for log dir + 2 steps for config dir
   private static currentProgress = 0;
 
   // creates the database files, only meant for use with cli commands
@@ -265,13 +265,7 @@ export class StorageManager implements IStorageManager {
       (++this.currentProgress / this.PROGRESS_STEPS),
       "Creating initial config file...",
     );
-    await fs.promises.writeFile(nodePath.join(configPath, "config.json"), JSON.stringify({ $schema: "./config-schema.json", ...config }, null, 2));
-
-    progressUpdater(
-      (++this.currentProgress / this.PROGRESS_STEPS),
-      "Creating config schema file...",
-    );
-    await fs.promises.copyFile(nodePath.join(__dirname, "config-schema.json"), nodePath.join(configPath, "config-schema.json"));
+    await fs.promises.writeFile(nodePath.join(configPath, "config.json"), JSON.stringify({ $schema: "https://raw.githubusercontent.com/jacob-hackney/picodb/refs/heads/main/src/internal/config-schema.json", ...config }, null, 2));
   }
   // #endregion DB Creation Helpers
 }
