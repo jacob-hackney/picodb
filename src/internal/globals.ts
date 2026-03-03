@@ -30,5 +30,5 @@ export const CONFIG_DEFAULTS = {
   cacheSize: Math.min(16384, maxCacheSize), // 128MiB default cache size, capped at one-eigth of system RAM
   autoRecovery: true,
   queueConcurrencyLimit: Math.min(4, Math.max(1, Math.floor(os.cpus().length / 2))), // default to half of available CPU cores, capped at 4
-  storagePath: "",
+  storagePath: "~/.picodb",
 };

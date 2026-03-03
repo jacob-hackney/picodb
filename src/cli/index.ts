@@ -5,8 +5,8 @@ import { initCommand } from "./commands/init.js";
 const program = new Command("picodb");
 
 program
-  .description("A CLI for picodb, a simple embedded database for Node.js")
-  .version("1.0.0");
+  .description("The CLI for picodb, a locally stored database made for Node.js")
+  .version("1.0.0", "-v, --version", "output the version number");
 
 initCommand(program);
 
