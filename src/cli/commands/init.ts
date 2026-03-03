@@ -12,7 +12,7 @@ export function initCommand(program: Command): void {
         .choices(["default", "advanced"])
         .default("default"),
     )
-    .option("--path <path>", "optional custom database location", "~/.picodb")
+    .option("--path <path>", "optional custom database location", "~")
     .action(async (mode: string, args: { path: string }) => {
       if (mode === "advanced") {
         console.warn(

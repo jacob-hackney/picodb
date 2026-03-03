@@ -117,7 +117,7 @@ export class StorageManager implements IStorageManager {
     progressUpdater(0, "Resolving path...");
     path = path
       ? nodePath.resolve(
-          nodePath.join(path.replace(/$~/, homedir()), ".picodb"),
+          nodePath.join(path.replace(/^~/, homedir()), ".picodb"),
         )
       : nodePath.join(homedir(), ".picodb");
 
