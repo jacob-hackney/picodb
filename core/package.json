@@ -1,5 +1,5 @@
 {
-  "name": "picodb",
+  "name": "@picodb/core",
   "version": "1.0.0",
   "description": "A purely JavaScript database, built for effectively storing data on your backend",
   "keywords": [
