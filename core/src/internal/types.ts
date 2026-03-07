@@ -86,3 +86,16 @@ export interface IBufferPoolManager {
   flush(forceEviction: boolean): Promise<void>;
 }
 //#endregion BufferPoolManager
+
+// #region LockManager
+type Lock = "S" | "X"; // shared or exclusive
+
+export interface ILockManager {
+  locks: Map<number, Lock>; // page id, lock type
+  sharedLockQuantity: Map<number, number>; // page id, amount of shared locks
+  queues: Map<number, { type: Lock; func: () => void }[]>; // page id, { lock type; waiting function to acquire lock }[]
+
+  acquireLock(pageId: number, lockType: Lock): Promise<void>;
+  releaseLock(pageId: number): void;
+}
+// #endregion LockManager

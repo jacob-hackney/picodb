@@ -12,7 +12,7 @@ export class BufferPoolManager implements IBufferPoolManager {
   pinCounts: Map<number, number> = new Map();
   cacheSize: number;
 
-  manager: IStorageManager;
+  manager: StorageManager;
 
   constructor(config: Config) {
     this.cacheSize = config.cacheSize;
