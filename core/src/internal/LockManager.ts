@@ -1,6 +1,6 @@
 import fs from "node:fs";
+import path from "node:path";
 
-import type { BufferPoolManager } from "./BufferPoolManager.js";
 import type { ILockManager } from "./types.js";
 
 export class LockManager implements ILockManager {
@@ -8,7 +8,22 @@ export class LockManager implements ILockManager {
   sharedLockQuantity: Map<number, number> = new Map();
   queues: Map<number, { type: "S" | "X"; func: () => void; }[]> = new Map();
 
-  constructor(public bufferPoolManager: BufferPoolManager) {};
+  async acquireProcessLock(dbPath: string): Promise<void> {
+    const lockFilePath = path.resolve(path.join(dbPath, ".picodb", "data", "picodb.lock"));
+
+    await fs.promises.writeFile(lockFilePath, process.pid.toString(), { flag: "wx" });
+  }
+
+  async releaseProcessLock(dbPath: string): Promise<void> {
+    const lockFilePath = path.resolve(path.join(dbPath, ".picodb", "data", "picodb.lock"));
+
+    // make sure the lock file exists and belongs to the current process
+    if((await fs.promises.readFile(lockFilePath)).toString() === process.pid.toString()) {
+      await fs.promises.unlink(lockFilePath);
+    } else {
+      throw new Error("Cannot release lock: lock file does not belong to the current process.");
+    }
+  }
 
   async acquireLock(pageId: number, lockType: "S" | "X"): Promise<void> {
     const currentLock = this.locks.get(pageId);

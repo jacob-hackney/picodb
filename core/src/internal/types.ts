@@ -95,7 +95,13 @@ export interface ILockManager {
   sharedLockQuantity: Map<number, number>; // page id, amount of shared locks
   queues: Map<number, { type: Lock; func: () => void }[]>; // page id, { lock type; waiting function to acquire lock }[]
 
+  acquireProcessLock(dbPath: string): Promise<void>;
+  releaseProcessLock(dbPath: string): Promise<void>;
+
   acquireLock(pageId: number, lockType: Lock): Promise<void>;
   releaseLock(pageId: number): void;
 }
 // #endregion LockManager
+
+// #region RecordManager
+// #endregion RecordManager
