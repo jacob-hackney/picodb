@@ -4,7 +4,13 @@ import type { Buffer } from "node:buffer";
 import { PageTypes } from "./globals.js";
 
 export interface Config {
+  server: {
+    host: string;
+    port: number;
+  };
   cacheSize: number;
+  corruptionCheck: boolean;
+  autoRecovery: boolean;
   queueConcurrencyLimit: number;
   storagePath: string;
 }
